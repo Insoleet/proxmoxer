@@ -16,7 +16,7 @@ class TestOpenSSHSuite(BaseSSHSuite):
     def setUp(self, _):
         self.proxmox = ProxmoxAPI('proxmox', user='root', backend='openssh', port=123)
         self.client = self.proxmox._store['session'].ssh_client
-        self._set_stderr('200 OK')
+        self._set_stderr('')
         self._set_stdout('')
 
     def _get_called_cmd(self):

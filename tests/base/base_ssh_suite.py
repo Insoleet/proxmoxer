@@ -62,7 +62,7 @@ class BaseSSHSuite(object):
                }
             ]""")
         result = self.proxmox.nodes('proxmox').storage('local').get()
-        eq_(self._get_called_cmd(), self._called_cmd('pvesh get /nodes/proxmox/storage/local'))
+        eq_(self._get_called_cmd(), self._called_cmd('pvesh get /nodes/proxmox/storage/local --output-format json'))
         eq_(result[0]['subdir'], 'status')
         eq_(result[1]['subdir'], 'content')
         eq_(result[2]['subdir'], 'upload')
@@ -71,16 +71,16 @@ class BaseSSHSuite(object):
 
     def test_delete(self):
         self.proxmox.nodes('proxmox').openvz(100).delete()
-        eq_(self._get_called_cmd(), self._called_cmd('pvesh delete /nodes/proxmox/openvz/100'))
-        self._set_stderr("200 OK")
+        eq_(self._get_called_cmd(), self._called_cmd('pvesh delete /nodes/proxmox/openvz/100 --output-format json'))
+        self._set_stderr("")
         self.proxmox.nodes('proxmox').openvz('101').delete()
-        eq_(self._get_called_cmd(), self._called_cmd('pvesh delete /nodes/proxmox/openvz/101'))
-        self._set_stderr("200 OK")
+        eq_(self._get_called_cmd(), self._called_cmd('pvesh delete /nodes/proxmox/openvz/101 --output-format json'))
+        self._set_stderr("")
         self.proxmox.nodes('proxmox').openvz.delete('102')
-        eq_(self._get_called_cmd(), self._called_cmd('pvesh delete /nodes/proxmox/openvz/102'))
+        eq_(self._get_called_cmd(), self._called_cmd('pvesh delete /nodes/proxmox/openvz/102 --output-format json'))
 
     def test_post(self):
-        self._set_stderr("200 OK")
+        self._set_stderr("")
         node = self.proxmox.nodes('proxmox')
         node.openvz.create(vmid=800,
                            ostemplate='local:vztmpl/debian-6-turnkey-core_12.0-1_i386.tar.gz',
@@ -105,7 +105,7 @@ class BaseSSHSuite(object):
         ok_('-swap 512' in options)
         ok_('-vmid 800' in options)
 
-        self._set_stderr("200 OK")
+        self._set_stderr("")
         node = self.proxmox.nodes('proxmox1')
         node.openvz.post(vmid=900,
                          ostemplate='local:vztmpl/debian-7-turnkey-core_12.0-1_i386.tar.gz',
@@ -131,7 +131,7 @@ class BaseSSHSuite(object):
         ok_('-vmid 900' in options)
 
     def test_put(self):
-        self._set_stderr("200 OK")
+        self._set_stderr("")
         node = self.proxmox.nodes('proxmox')
         node.openvz(101).config.set(cpus=4, memory=1024, ip_address='10.0.100.100', onboot=True)
         cmd, options = self._split_cmd(self._get_called_cmd())
@@ -141,7 +141,7 @@ class BaseSSHSuite(object):
         ok_('-onboot True' in options)
         ok_('-cpus 4' in options)
 
-        self._set_stderr("200 OK")
+        self._set_stderr("")
         node = self.proxmox.nodes('proxmox1')
         node.openvz('102').config.put(cpus=2, memory=512, ip_address='10.0.100.200', onboot=False)
         cmd, options = self._split_cmd(self._get_called_cmd())
@@ -156,8 +156,9 @@ class BaseSSHSuite(object):
         self._set_stderr("500 whoops")
         self.proxmox.nodes('proxmox').get()
 
-    def test_no_error_with_extra_output(self):
-        self._set_stderr("Extra output\n200 OK")
+    @raises(ResourceException)
+    def test_extra_output_error(self):
+        self._set_stderr("Extra output\n")
         self.proxmox.nodes('proxmox').get()
 
     @raises(ResourceException)
