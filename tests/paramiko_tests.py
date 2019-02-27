@@ -31,7 +31,7 @@ class TestParamikoSuite(BaseSSHSuite):
         self.proxmox = ProxmoxAPI('proxmox', user='root', backend='ssh_paramiko', port=123)
         self.client = self.proxmox._store['session'].ssh_client
         self.session = self.client.get_transport().open_session()
-        self._set_stderr('200 OK')
+        self._set_stderr('')
         self._set_stdout('')
 
     def _get_called_cmd(self):
@@ -53,7 +53,7 @@ class TestParamikoSuiteWithSudo(BaseSSHSuite):
         self.proxmox = ProxmoxAPI('proxmox', user='root', backend='ssh_paramiko', port=123, sudo=True)
         self.client = self.proxmox._store['session'].ssh_client
         self.session = self.client.get_transport().open_session()
-        self._set_stderr('200 OK')
+        self._set_stderr('')
         self._set_stdout('')
 
     def _get_called_cmd(self):

@@ -41,14 +41,18 @@ class ProxmoxBaseSSHSession(object):
             data['tmpfilename'] = tmp_filename
 
         translated_data = ' '.join(["-{0} {1}".format(k, v) for k, v in chain(data.items(), params.items())])
-        full_cmd = 'pvesh {0}'.format(' '.join(filter(None, (cmd, url, translated_data))))
+        full_cmd = 'pvesh {0} --output-format json'.format(' '.join(filter(None, (cmd, url, translated_data))))
 
         stdout, stderr = self._exec(full_cmd)
         match = lambda s: re.match('\d\d\d [a-zA-Z]', s)
         # sometimes contains extra text like 'trying to acquire lock...OK'
-        status_code = next(
-            (int(s.split()[0]) for s in stderr.splitlines() if match(s)),
-            500)
+        if stderr:
+            status_code = next(
+                (int(s.split()[0]) for s in stderr.splitlines() if match(s)),
+                500)
+        else:
+            status_code = 200
+
         if stdout:
             return Response(stdout, status_code)
         else:
